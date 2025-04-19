@@ -9,13 +9,6 @@ resource "aws_iam_openid_connect_provider" "container_cluster_oidc" {
   url             = data.tls_certificate.container_cluster_oidc.url
 }
 
-
-# Define IAM Role for Workload Identity
-resource "aws_iam_role" "workload_identity" {
-  assume_role_policy = data.aws_iam_policy_document.workload_identity_assume_role_policy.json
-  name               = "${var.application_name}-${var.environment_name}-workload-identity"
-}
-
 data "aws_iam_policy_document" "workload_identity_assume_role_policy" {
   statement {
     actions = ["sts:AssumeRoleWithWebIdentity"]
@@ -34,14 +27,10 @@ data "aws_iam_policy_document" "workload_identity_assume_role_policy" {
   }
 }
 
-
-# Define IAM Policy for Secrets Access
-resource "aws_iam_policy" "workload_identity" {
-
-  name        = "${var.application_name}-${var.environment_name}-workload-identity"
-  description = "Policy for ${var.application_name}-${var.environment_name} Workload Identity"
-  policy      = data.aws_iam_policy_document.workload_identity_policy.json
-
+# Define IAM Role for Workload Identity
+resource "aws_iam_role" "workload_identity" {
+  name               = "${var.application_name}-${var.environment_name}-workload-identity"
+  assume_role_policy = data.aws_iam_policy_document.workload_identity_assume_role_policy.json
 }
 
 data "aws_iam_policy_document" "workload_identity_policy" {
@@ -59,8 +48,16 @@ data "aws_iam_policy_document" "workload_identity_policy" {
   }
 }
 
+# Define IAM Policy for Secrets Access
+resource "aws_iam_policy" "workload_identity" {
+
+  name        = "${var.application_name}-${var.environment_name}-workload-identity"
+  description = "Policy for ${var.application_name}-${var.environment_name} Workload Identity"
+  policy      = data.aws_iam_policy_document.workload_identity_policy.json
+
+}
 
 resource "aws_iam_role_policy_attachment" "workload_identity_policy" {
-  policy_arn = aws_iam_policy.workload_identity.arn
   role       = aws_iam_role.workload_identity.name
+  policy_arn = aws_iam_policy.workload_identity.arn
 }

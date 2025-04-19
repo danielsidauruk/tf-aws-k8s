@@ -14,7 +14,6 @@ data "aws_iam_policy_document" "container_node_group" {
 
 resource "aws_iam_role" "container_node_group" {
   name = "eks-${var.application_name}-${var.environment_name}-nodegroup-role"
-
   assume_role_policy = data.aws_iam_policy_document.container_node_group.json
 
   tags = {
